@@ -1,5 +1,5 @@
 - name: Splatnet data
-  uses: lowlighter/metrics@latest
+  uses: jaderdias/metrics@latest
   with:
     filename: metrics.plugin.splatoon.svg
     token: ${{ secrets.METRICS_TOKEN }}
@@ -12,7 +12,7 @@
     skip: true
 
 - name: Splatnet data with stat.ink integration
-  uses: lowlighter/metrics@latest
+  uses: jaderdias/metrics@latest
   with:
     filename: metrics.plugin.splatoon.svg
     token: ${{ secrets.METRICS_TOKEN }}

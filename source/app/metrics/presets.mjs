@@ -5,12 +5,12 @@ import fetch from "node-fetch"
 import metadata from "./metadata.mjs"
 
 /**Presets parser */
-export default async function presets(list, {log = true, core = null} = {}) {
+export default async function presets(list, { log = true, core = null } = {}) {
   //Init
-  const {plugins} = await metadata({log: false})
-  const {"config.presets": files} = plugins.core.inputs({q: {"config.presets": list}, account: "bypass"})
+  const { plugins } = await metadata({ log: false })
+  const { "config.presets": files } = plugins.core.inputs({ q: { "config.presets": list }, account: "bypass" })
   const logger = log ? console.debug : () => null
-  const allowed = Object.entries(metadata.inputs).filter(([_, {type, preset}]) => (type !== "token") && (!/^(?:[Ff]alse|[Oo]ff|[Nn]o|0)$/.test(preset))).map(([key]) => key)
+  const allowed = Object.entries(metadata.inputs).filter(([_, { type, preset }]) => (type !== "token") && (!/^(?:[Ff]alse|[Oo]ff|[Nn]o|0)$/.test(preset))).map(([key]) => key)
   const env = core ? "action" : "web"
   const options = {}
 
@@ -22,7 +22,7 @@ export default async function presets(list, {log = true, core = null} = {}) {
       let text = ""
       if (file.startsWith("@")) {
         logger(`metrics/presets > ${file} seems to be predefined preset, fetching`)
-        text = await fetch(`https://raw.githubusercontent.com/lowlighter/metrics/presets/${file.substring(1)}/preset.yml`).then(response => response.text())
+        text = await fetch(`https://raw.githubusercontent.com/jaderdias/metrics/presets/${file.substring(1)}/preset.yml`).then(response => response.text())
       }
       else if (file.startsWith("https://")) {
         logger(`metrics/presets > ${file} seems to be an url, fetching`)
@@ -36,7 +36,7 @@ export default async function presets(list, {log = true, core = null} = {}) {
         logger(`metrics/presets > ${file} cannot be loaded in current environment ${env}, skipping`)
         continue
       }
-      const {schema, with: inputs} = yaml.load(text)
+      const { schema, with: inputs } = yaml.load(text)
       logger(`metrics/presets > ${file} preset schema is ${schema}`)
 
       //Evaluate preset

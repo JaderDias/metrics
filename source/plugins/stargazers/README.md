@@ -19,9 +19,9 @@ All product and company names are trademarks™ or registered® trademarks of th
   </tr>
   <tr>
     <td colspan="2" align="center">
-      <details open><summary>Classic charts</summary><img src="https://github.com/lowlighter/metrics/blob/examples/metrics.plugin.stargazers.svg" alt=""></img></details>
-      <details><summary>Chartist charts</summary><img src="https://github.com/lowlighter/metrics/blob/examples/metrics.plugin.stargazers.chartist.svg" alt=""></img></details>
-      <details open><summary>Worldmap</summary><img src="https://github.com/lowlighter/metrics/blob/examples/metrics.plugin.stargazers.worldmap.svg" alt=""></img></details>
+      <details open><summary>Classic charts</summary><img src="https://github.com/jaderdias/metrics/blob/examples/metrics.plugin.stargazers.svg" alt=""></img></details>
+      <details><summary>Chartist charts</summary><img src="https://github.com/jaderdias/metrics/blob/examples/metrics.plugin.stargazers.chartist.svg" alt=""></img></details>
+      <details open><summary>Worldmap</summary><img src="https://github.com/jaderdias/metrics/blob/examples/metrics.plugin.stargazers.worldmap.svg" alt=""></img></details>
       <img width="900" height="1" alt="">
     </td>
   </tr>
@@ -134,7 +134,7 @@ Helps to avoid consuming too much Google Geocoding API requests while still bein
 <!--examples-->
 ```yaml
 name: Using classic charts
-uses: lowlighter/metrics@latest
+uses: jaderdias/metrics@latest
 with:
   filename: metrics.plugin.stargazers.svg
   token: ${{ secrets.METRICS_TOKEN }}
@@ -144,7 +144,7 @@ with:
 ```
 ```yaml
 name: Using chartist charts
-uses: lowlighter/metrics@latest
+uses: jaderdias/metrics@latest
 with:
   filename: metrics.plugin.stargazers.chartist.svg
   token: ${{ secrets.METRICS_TOKEN }}
@@ -155,7 +155,7 @@ with:
 ```
 ```yaml
 name: With worldmap
-uses: lowlighter/metrics@latest
+uses: jaderdias/metrics@latest
 with:
   filename: metrics.plugin.stargazers.worldmap.svg
   token: ${{ secrets.METRICS_TOKEN }}

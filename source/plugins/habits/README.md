@@ -19,8 +19,8 @@ All product and company names are trademarks™ or registered® trademarks of th
   </tr>
   <tr>
     <td colspan="2" align="center">
-      <details open><summary>Recent activity charts</summary><img src="https://github.com/lowlighter/metrics/blob/examples/metrics.plugin.habits.charts.svg" alt=""></img></details>
-      <details open><summary>Mildly interesting facts</summary><img src="https://github.com/lowlighter/metrics/blob/examples/metrics.plugin.habits.facts.svg" alt=""></img></details>
+      <details open><summary>Recent activity charts</summary><img src="https://github.com/jaderdias/metrics/blob/examples/metrics.plugin.habits.charts.svg" alt=""></img></details>
+      <details open><summary>Mildly interesting facts</summary><img src="https://github.com/jaderdias/metrics/blob/examples/metrics.plugin.habits.facts.svg" alt=""></img></details>
       <img width="900" height="1" alt="">
     </td>
   </tr>
@@ -175,7 +175,7 @@ Configure `config_timezone` (see [supported timezone](https://en.wikipedia.org/w
 
 *Example: configuring timezone*
 ```yaml
-- uses: lowlighter/metrics@latest
+- uses: jaderdias/metrics@latest
   with:
     config_timezone: Europe/Paris
 ```
@@ -185,7 +185,7 @@ Configure `config_timezone` (see [supported timezone](https://en.wikipedia.org/w
 <!--examples-->
 ```yaml
 name: Mildly interesting facts
-uses: lowlighter/metrics@latest
+uses: jaderdias/metrics@latest
 with:
   filename: metrics.plugin.habits.facts.svg
   token: ${{ secrets.METRICS_TOKEN }}
@@ -198,7 +198,7 @@ with:
 ```
 ```yaml
 name: Recent activity charts
-uses: lowlighter/metrics@latest
+uses: jaderdias/metrics@latest
 with:
   filename: metrics.plugin.habits.charts.svg
   token: ${{ secrets.METRICS_TOKEN }}

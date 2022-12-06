@@ -1,5 +1,5 @@
 /**Mocked data */
-export default async function({faker}, target, that, args) {
+export default async function ({ faker }, target, that, args) {
   //Arguments
   const [url] = args
   //Head request
@@ -21,7 +21,7 @@ export default async function({faker}, target, that, args) {
     console.debug(`metrics/compute/mocks > mocking rest api result > rest.request ${url}`)
     return ({
       status: 200,
-      url: "https://api.github.com/repos/lowlighter/metrics/commits/MOCKED_SHA",
+      url: "https://api.github.com/repos/jaderdias/metrics/commits/MOCKED_SHA",
       data: {
         sha: "MOCKED_SHA",
         commit: {
@@ -35,7 +35,7 @@ export default async function({faker}, target, that, args) {
             email: faker.internet.email(),
             date: `${faker.date.recent(7)}`,
           },
-          url: "https://api.github.com/repos/lowlighter/metrics/commits/MOCKED_SHA",
+          url: "https://api.github.com/repos/jaderdias/metrics/commits/MOCKED_SHA",
         },
         author: {
           login: faker.internet.userName(),

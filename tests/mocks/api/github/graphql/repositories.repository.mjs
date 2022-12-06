@@ -1,5 +1,5 @@
 /**Mocked data */
-export default function({faker, query, login = faker.internet.userName()}) {
+export default function ({ faker, query, login = faker.internet.userName() }) {
   console.debug("metrics/compute/mocks > mocking graphql api result > repositories/repository")
   return ({
     repository: {
@@ -10,7 +10,7 @@ export default function({faker, query, login = faker.internet.userName()}) {
       issues: {
         totalCount: faker.datatype.number(100),
       },
-      nameWithOwner: "lowlighter/metrics",
+      nameWithOwner: "jaderdias/metrics",
       openGraphImageUrl: "https://repository-images.githubusercontent.com/293860197/7fd72080-496d-11eb-8fe0-238b38a0746a",
       pullRequests: {
         totalCount: faker.datatype.number(100),
