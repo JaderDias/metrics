@@ -28,11 +28,11 @@ const modes = {
 }
 
 //Setup
-export default async function ({ login, imports, data, q, account }, { enabled = false, token = "", sandbox = false, extras = false } = {}) {
+export default async function({login, imports, data, q, account}, {enabled = false, token = "", sandbox = false, extras = false} = {}) {
   //Plugin execution
   try {
     //Check if plugin is enabled and requirements are met
-    if ((!q.music) || (!imports.metadata.plugins.music.enabled(enabled, { extras })))
+    if ((!q.music) || (!imports.metadata.plugins.music.enabled(enabled, {extras})))
       return null
 
     //Initialization
@@ -47,12 +47,12 @@ export default async function ({ login, imports, data, q, account }, { enabled =
     let tracks = null
 
     //Load inputs
-    let { provider, mode, playlist, limit, user, "played.at": played_at, "time.range": time_range, "top.type": top_type, token: _token } = imports.metadata.plugins.music.inputs({ data, account, q })
+    let {provider, mode, playlist, limit, user, "played.at": played_at, "time.range": time_range, "top.type": top_type, token: _token} = imports.metadata.plugins.music.inputs({data, account, q})
     if ((sandbox) && (_token)) {
       token = _token
       console.debug(`metrics/compute/${login}/plugins > music > overridden token value through user inputs as sandbox mode is enabled`)
     }
-    if (!imports.metadata.plugins.music.extras("token", { extras, error: false }))
+    if (!imports.metadata.plugins.music.extras("token", {extras, error: false}))
       token = ""
 
     //Auto-guess parameters
@@ -60,7 +60,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
       if (playlist) {
         mode = "playlist"
         if (!provider) {
-          for (const [name, { embed }] of Object.entries(providers)) {
+          for (const [name, {embed}] of Object.entries(providers)) {
             if (embed.test(playlist))
               provider = name
           }
@@ -73,16 +73,16 @@ export default async function ({ login, imports, data, q, account }, { enabled =
     }
     //Provider
     if (!(provider in providers))
-      throw { error: { message: provider ? `Unsupported provider "${provider}"` : "Provider is not set" }, ...raw }
+      throw {error: {message: provider ? `Unsupported provider "${provider}"` : "Provider is not set"}, ...raw}
     //Mode
     if (!(mode in modes))
-      throw { error: { message: `Unsupported mode "${mode}"` }, ...raw }
+      throw {error: {message: `Unsupported mode "${mode}"`}, ...raw}
     //Playlist mode
     if (mode === "playlist") {
       if (!playlist)
-        throw { error: { message: "Playlist URL is not set" }, ...raw }
+        throw {error: {message: "Playlist URL is not set"}, ...raw}
       if (!providers[provider].embed.test(playlist))
-        throw { error: { message: "Unsupported playlist URL format" }, ...raw }
+        throw {error: {message: "Unsupported playlist URL format"}, ...raw}
     }
     //Limit
     limit = Math.max(1, Math.min(100, Number(limit)))
@@ -155,7 +155,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
           }
           //Unsupported
           default:
-            throw { error: { message: `Unsupported mode "${mode}" for provider "${provider}"` }, ...raw }
+            throw {error: {message: `Unsupported mode "${mode}" for provider "${provider}"`}, ...raw}
         }
         //Close browser
         console.debug(`metrics/compute/${login}/plugins > music > closing browser`)
@@ -164,7 +164,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
         if (Array.isArray(tracks)) {
           //Tracks
           console.debug(`metrics/compute/${login}/plugins > music > found ${tracks.length} tracks`)
-          console.debug(imports.util.inspect(tracks, { depth: Infinity, maxStringLength: 256 }))
+          console.debug(imports.util.inspect(tracks, {depth: Infinity, maxStringLength: 256}))
           //Shuffle tracks
           tracks = imports.shuffle(tracks)
         }
@@ -179,12 +179,12 @@ export default async function ({ login, imports, data, q, account }, { enabled =
             //Prepare credentials
             const [client_id, client_secret, refresh_token] = token.split(",").map(part => part.trim())
             if ((!client_id) || (!client_secret) || (!refresh_token))
-              throw { error: { message: "Token must contain client id, client secret and refresh token" } }
+              throw {error: {message: "Token must contain client id, client secret and refresh token"}}
             //API call and parse tracklist
             try {
               //Request access token
               console.debug(`metrics/compute/${login}/plugins > music > requesting access token with spotify refresh token`)
-              const { data: { access_token: access } } = await imports.axios.post("https://accounts.spotify.com/api/token", `${new imports.url.URLSearchParams({ grant_type: "refresh_token", refresh_token, client_id, client_secret })}`, {
+              const {data: {access_token: access}} = await imports.axios.post("https://accounts.spotify.com/api/token", `${new imports.url.URLSearchParams({grant_type: "refresh_token", refresh_token, client_id, client_secret})}`, {
                 headers: {
                   "Content-Type": "application/x-www-form-urlencoded",
                 },
@@ -202,15 +202,15 @@ export default async function ({ login, imports, data, q, account }, { enabled =
                     Accept: "application/json",
                     Authorization: `Bearer ${access}`,
                   },
-                })).data.items.map(({ track, played_at }) => ({
+                })).data.items.map(({track, played_at}) => ({
                   name: track.name,
                   artist: track.artists[0].name,
                   artwork: track.album.images[0].url,
-                  played_at: played_at ? `${imports.format.date(played_at, { time: true })} on ${imports.format.date(played_at, { date: true })}` : null,
+                  played_at: played_at ? `${imports.format.date(played_at, {time: true})} on ${imports.format.date(played_at, {date: true})}` : null,
                 }))
                 //Ensure no duplicate are added
                 for (const track of loaded) {
-                  if (!tracks.map(({ name }) => name).includes(track.name))
+                  if (!tracks.map(({name}) => name).includes(track.name))
                     tracks.push(track)
                 }
                 //Early break
@@ -225,7 +225,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
                 const description = error.response.data?.error_description ?? null
                 const message = `API returned ${status}${description ? ` (${description})` : ""}`
                 error = error.response?.data ?? null
-                throw { error: { message, instance: error }, ...raw }
+                throw {error: {message, instance: error}, ...raw}
               }
               throw error
             }
@@ -254,7 +254,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
                 const description = error.response.data?.message ?? null
                 const message = `API returned ${status}${description ? ` (${description})` : ""}`
                 error = error.response?.data ?? null
-                throw { error: { message, instance: error }, ...raw }
+                throw {error: {message, instance: error}, ...raw}
               }
               throw error
             }
@@ -317,7 +317,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
           }
           //Unsupported
           default:
-            throw { error: { message: `Unsupported mode "${mode}" for provider "${provider}"` }, ...raw }
+            throw {error: {message: `Unsupported mode "${mode}" for provider "${provider}"`}, ...raw}
         }
         break
       }
@@ -334,7 +334,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
             time_msg = "overall"
             break
           default:
-            throw { error: { message: `Unsupported time range "${time_range}"` }, ...raw }
+            throw {error: {message: `Unsupported time range "${time_range}"`}, ...raw}
         }
 
         if (top_type === "artists") {
@@ -359,15 +359,15 @@ export default async function ({ login, imports, data, q, account }, { enabled =
             //Prepare credentials
             const [client_id, client_secret, refresh_token] = token.split(",").map(part => part.trim())
             if ((!client_id) || (!client_secret) || (!refresh_token))
-              throw { error: { message: "Token must contain client id, client secret and refresh token" } }
+              throw {error: {message: "Token must contain client id, client secret and refresh token"}}
             else if (limit > 50)
-              throw { error: { message: "Top limit cannot exceed 50 for this provider" } }
+              throw {error: {message: "Top limit cannot exceed 50 for this provider"}}
 
             //API call and parse tracklist
             try {
               //Request access token
               console.debug(`metrics/compute/${login}/plugins > music > requesting access token with spotify refresh token`)
-              const { data: { access_token: access } } = await imports.axios.post("https://accounts.spotify.com/api/token", `${new imports.url.URLSearchParams({ grant_type: "refresh_token", refresh_token, client_id, client_secret })}`, {
+              const {data: {access_token: access}} = await imports.axios.post("https://accounts.spotify.com/api/token", `${new imports.url.URLSearchParams({grant_type: "refresh_token", refresh_token, client_id, client_secret})}`, {
                 headers: {
                   "Content-Type": "application/x-www-form-urlencoded",
                 },
@@ -388,7 +388,7 @@ export default async function ({ login, imports, data, q, account }, { enabled =
                       },
                     },
                   )
-                ).data.items.map(({ name, genres, images }) => ({
+                ).data.items.map(({name, genres, images}) => ({
                   name,
                   artist: genres.join(" • "),
                   artwork: images[0].url,
@@ -404,14 +404,14 @@ export default async function ({ login, imports, data, q, account }, { enabled =
                       },
                     },
                   )
-                ).data.items.map(({ name, artists, album }) => ({
+                ).data.items.map(({name, artists, album}) => ({
                   name,
                   artist: artists[0].name,
                   artwork: album.images[0].url,
                 }))
               //Ensure no duplicate are added
               for (const track of loaded) {
-                if (!tracks.map(({ name }) => name).includes(track.name))
+                if (!tracks.map(({name}) => name).includes(track.name))
                   tracks.push(track)
               }
             }
@@ -467,13 +467,13 @@ export default async function ({ login, imports, data, q, account }, { enabled =
           }
           //Unsupported
           default:
-            throw { error: { message: `Unsupported mode "${mode}" for provider "${provider}"` }, ...raw }
+            throw {error: {message: `Unsupported mode "${mode}" for provider "${provider}"`}, ...raw}
         }
         break
       }
       //Unsupported
       default:
-        throw { error: { message: `Unsupported mode "${mode}"` }, ...raw }
+        throw {error: {message: `Unsupported mode "${mode}"`}, ...raw}
     }
 
     //Format tracks
@@ -490,11 +490,11 @@ export default async function ({ login, imports, data, q, account }, { enabled =
         track.artwork = await imports.imgb64(track.artwork)
       }
       //Save results
-      return { ...raw, user, tracks, played_at }
+      return {...raw, user, tracks, played_at}
     }
 
     //Unhandled error
-    throw { error: { message: "Failed to retrieve tracks" } }
+    throw {error: {message: "Failed to retrieve tracks"}}
   }
   //Handle errors
   catch (error) {

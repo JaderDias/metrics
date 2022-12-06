@@ -13,10 +13,10 @@ const categories = ["core", "github", "social", "community"]
 let previous = null
 
 //Environment
-const env = { ghactions: `${process.env.GITHUB_ACTIONS}` === "true" }
+const env = {ghactions: `${process.env.GITHUB_ACTIONS}` === "true"}
 
 /**Metadata descriptor parser */
-export default async function metadata({ log = true, diff = false } = {}) {
+export default async function metadata({log = true, diff = false} = {}) {
   //Paths
   const __metrics = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../../..")
   const __templates = path.join(__metrics, "source/templates")
@@ -50,18 +50,18 @@ export default async function metadata({ log = true, diff = false } = {}) {
           if (!(await fs.promises.lstat(path.join(___plugins, name))).isDirectory())
             continue
           logger(`metrics/metadata > loading plugin metadata [community/${name}]`)
-          Plugins[name] = await metadata.plugin({ __plugins: ___plugins, __templates, name, logger })
+          Plugins[name] = await metadata.plugin({__plugins: ___plugins, __templates, name, logger})
           Plugins[name].community = true
         }
         continue
       }
       default:
         logger(`metrics/metadata > loading plugin metadata [${name}]`)
-        Plugins[name] = await metadata.plugin({ __plugins, __templates, name, logger })
+        Plugins[name] = await metadata.plugin({__plugins, __templates, name, logger})
     }
   }
   //Reorder keys
-  const { base, core, ...plugins } = Plugins //eslint-disable-line no-unused-vars
+  const {base, core, ...plugins} = Plugins //eslint-disable-line no-unused-vars
   Plugins = Object.fromEntries(Object.entries(Plugins).sort(([_an, a], [_bn, b]) => a.category === b.category ? (a.index ?? Infinity) - (b.index ?? Infinity) : categories.indexOf(a.category) - categories.indexOf(b.category)))
   logger(`metrics/metadata > loaded [${Object.keys(Plugins).join(", ")}]`)
   //Load templates metadata
@@ -71,11 +71,11 @@ export default async function metadata({ log = true, diff = false } = {}) {
     if (!(await fs.promises.lstat(path.join(__templates, name))).isDirectory())
       continue
     logger(`metrics/metadata > loading template metadata [${name}]`)
-    Templates[name] = await metadata.template({ __templates, name, plugins, logger })
+    Templates[name] = await metadata.template({__templates, name, plugins, logger})
   }
   //Reorder keys
-  const { community, ...templates } = Templates
-  Templates = { ...Object.fromEntries(Object.entries(templates).sort(([_an, a], [_bn, b]) => (a.index ?? Infinity) - (b.index ?? Infinity))), community }
+  const {community, ...templates} = Templates
+  Templates = {...Object.fromEntries(Object.entries(templates).sort(([_an, a], [_bn, b]) => (a.index ?? Infinity) - (b.index ?? Infinity))), community}
 
   //Packaged metadata
   const packaged = JSON.parse(`${await fs.promises.readFile(__package)}`)
@@ -84,18 +84,18 @@ export default async function metadata({ log = true, diff = false } = {}) {
   const descriptor = yaml.load(`${await fs.promises.readFile(__descriptor, "utf-8")}`)
 
   //Metadata
-  return { plugins: Plugins, templates: Templates, packaged, descriptor, env }
+  return {plugins: Plugins, templates: Templates, packaged, descriptor, env}
 }
 
 /**Metadata extractor for inputs */
 metadata.inputs = {}
 
 /**Metadata extractor for templates */
-metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
+metadata.plugin = async function({__plugins, __templates, name, logger}) {
   try {
     //Load meta descriptor
     const raw = `${await fs.promises.readFile(path.join(__plugins, name, "metadata.yml"), "utf-8")}`
-    const { inputs, ...meta } = yaml.load(raw)
+    const {inputs, ...meta} = yaml.load(raw)
     Object.assign(metadata.inputs, inputs)
 
     //Category
@@ -109,14 +109,14 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
 
     //Inputs parser
     {
-      meta.inputs = function ({ data: { user = null } = {}, q, account }, defaults = {}) {
+      meta.inputs = function({data: {user = null} = {}, q, account}, defaults = {}) {
         //Support check
         if (!account)
           console.debug(`metrics/inputs > account type not set for plugin ${name}!`)
         if (account !== "bypass") {
           const context = q.repo ? "repository" : account
           if (!meta.supports?.includes(context))
-            throw { error: { message: `Unsupported context ${context}`, instance: new Error() } }
+            throw {error: {message: `Unsupported context ${context}`, instance: new Error()}}
         }
         //Special values replacer
         const replacer = value => {
@@ -133,9 +133,9 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
         }
         //Inputs checks
         const result = Object.fromEntries(
-          Object.entries(inputs).map(([key, { type, format, default: defaulted, min, max, values, inherits: _inherits }]) => [
+          Object.entries(inputs).map(([key, {type, format, default: defaulted, min, max, values, inherits: _inherits}]) => [
             //Format key
-            metadata.to.query(key, { name }),
+            metadata.to.query(key, {name}),
             //Format value
             (defaulted => {
               //Default value
@@ -170,7 +170,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
                     logger(`metrics/inputs > failed to decode uri : ${value}`)
                     value = defaulted
                   }
-                  const separators = { "comma-separated": ",", "space-separated": " ", "newline-separated": "\n" }
+                  const separators = {"comma-separated": ",", "space-separated": " ", "newline-separated": "\n"}
                   const formats = [format, "comma-separated"].flat(Infinity).filter(s => s in separators)
                   let parsed = [], used = "comma-separated"
                   for (const separation of formats) {
@@ -230,24 +230,24 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
         logger(`metrics/inputs > ${name} > ${JSON.stringify(result)}`)
         return result
       }
-      Object.assign(meta.inputs, inputs, Object.fromEntries(Object.entries(inputs).map(([key, value]) => [metadata.to.query(key, { name }), value])))
+      Object.assign(meta.inputs, inputs, Object.fromEntries(Object.entries(inputs).map(([key, value]) => [metadata.to.query(key, {name}), value])))
     }
 
     //Enable state handler
     {
-      meta.enabled = function (enabled, { extras = {}, error = true } = {}) {
+      meta.enabled = function(enabled, {extras = {}, error = true} = {}) {
         if ((process.env.GITHUB_ACTIONS) && (!enabled))
           console.warn(`::warning::Plugin "${name}" is currently disabled. Add "plugin_${name}: yes" to your workflow to enable it.`)
         if ((error) && (!enabled))
-          throw Object.assign(new Error(`Plugin "${name}" is disabled${process.env.GITHUB_ACTIONS ? "" : " on this server"}`), { enabled: true })
-        return (enabled) && (meta.extras("enabled", { extras, error }))
+          throw Object.assign(new Error(`Plugin "${name}" is disabled${process.env.GITHUB_ACTIONS ? "" : " on this server"}`), {enabled: true})
+        return (enabled) && (meta.extras("enabled", {extras, error}))
       }
     }
 
     //Extra features parser
     {
-      meta.extras = function (input, { extras = {}, error = true } = {}) {
-        const key = metadata.to.yaml(input, { name })
+      meta.extras = function(input, {extras = {}, error = true} = {}) {
+        const key = metadata.to.yaml(input, {name})
         try {
           //Required permissions
           const required = inputs[key]?.extras ?? null
@@ -297,7 +297,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
             console.debug(`metrics/extras > ${name} > ${key} > skipping (no error mode)`)
             return false
           }
-          throw Object.assign(new Error(`Option "${key}" is disabled on this server`), { extras: true })
+          throw Object.assign(new Error(`Option "${key}" is disabled on this server`), {extras: true})
         }
       }
     }
@@ -325,13 +325,13 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
               [key]: Object.fromEntries(
                 Object.entries(value).filter(([key]) => ["description", "default", "required"].includes(key)).map(([k, v]) => k === "description" ? [k, v.split("\n")[0]] : k === "default" ? [k, ((/^\$\{\{[\s\S]+\}\}$/.test(v)) || (["config_presets", "config_timezone", "use_prebuilt_image"].includes(key))) ? v : "<default-value>"] : [k, v]),
               ),
-            }, { quotingType: '"', noCompatMode: true }),
+            }, {quotingType: '"', noCompatMode: true}),
           },
         ]),
       )
 
       //Action inputs
-      meta.inputs.action = function ({ core, preset = {} }) {
+      meta.inputs.action = function({core, preset = {}}) {
         //Build query object from inputs
         const q = {}
         for (const key of Object.keys(inputs)) {
@@ -368,32 +368,32 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
             q[key] = value
           }
         }
-        return meta.inputs({ q, account: "bypass" })
+        return meta.inputs({q, account: "bypass"})
       }
     }
 
     //Web metadata
     {
       meta.web = Object.fromEntries(
-        Object.entries(inputs).map(([key, { type, description: text, example, default: defaulted, min = 0, max = 9999, values, extras }]) => [
+        Object.entries(inputs).map(([key, {type, description: text, example, default: defaulted, min = 0, max = 9999, values, extras}]) => [
           //Format key
           metadata.to.query(key),
           //Value descriptor
           (() => {
             switch (type) {
               case "boolean":
-                return { text, type: "boolean", defaulted: /^(?:[Tt]rue|[Oo]n|[Yy]es|1)$/.test(defaulted) ? true : /^(?:[Ff]alse|[Oo]ff|[Nn]o|0)$/.test(defaulted) ? false : defaulted, extras }
+                return {text, type: "boolean", defaulted: /^(?:[Tt]rue|[Oo]n|[Yy]es|1)$/.test(defaulted) ? true : /^(?:[Ff]alse|[Oo]ff|[Nn]o|0)$/.test(defaulted) ? false : defaulted, extras}
               case "number":
-                return { text, type: "number", min, max, defaulted, extras }
+                return {text, type: "number", min, max, defaulted, extras}
               case "array":
-                return { text, type: "text", placeholder: example ?? defaulted, defaulted, extras }
+                return {text, type: "text", placeholder: example ?? defaulted, defaulted, extras}
               case "string": {
                 if (Array.isArray(values))
-                  return { text, type: "select", values, defaulted }
-                return { text, type: "text", placeholder: example ?? defaulted, defaulted, extras }
+                  return {text, type: "select", values, defaulted}
+                return {text, type: "text", placeholder: example ?? defaulted, defaulted, extras}
               }
               case "json":
-                return { text, type: "text", placeholder: example ?? defaulted, defaulted, extras }
+                return {text, type: "text", placeholder: example ?? defaulted, defaulted, extras}
               default:
                 return null
             }
@@ -406,7 +406,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
     {
       //Extract demos
       const raw = `${await fs.promises.readFile(path.join(__plugins, name, "README.md"), "utf-8")}`
-      const demo = meta.examples ? demos({ examples: meta.examples }) : raw.match(/(?<demo><table>[\s\S]*?<[/]table>)/)?.groups?.demo?.replace(/<[/]?(?:table|tr)>/g, "")?.trim() ?? "<td></td>"
+      const demo = meta.examples ? demos({examples: meta.examples}) : raw.match(/(?<demo><table>[\s\S]*?<[/]table>)/)?.groups?.demo?.replace(/<[/]?(?:table|tr)>/g, "")?.trim() ?? "<td></td>"
 
       //Compatibility
       const templates = {}
@@ -427,33 +427,35 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
         "<table>",
         '  <tr><td colspan="2"><a href="/README.md#-plugins">← Back to plugins index</a></td></tr>',
         `  <tr><th colspan="2"><h3>${meta.name}</h3></th></tr>`,
-        `  <tr><td colspan="2" align="center">${marked.parse(meta.description ?? "", { silent: true })}</td></tr>`,
-        meta.deprecation ? `  <tr><th>⚠️ Deprecated</th><td>${marked.parse(meta.deprecation ?? "", { silent: true })}</td></tr>` : "",
-        meta.disclaimer ? `  <tr><th>⚠️ Disclaimer</th><td>${marked.parse(meta.disclaimer ?? "", { silent: true })}</td></tr>` : "",
-        meta.notes ? `  <tr><th>ℹ Additional notes</th><td>${marked.parse(meta.notes ?? "", { silent: true })}</td></tr>` : "",
+        `  <tr><td colspan="2" align="center">${marked.parse(meta.description ?? "", {silent: true})}</td></tr>`,
+        meta.deprecation ? `  <tr><th>⚠️ Deprecated</th><td>${marked.parse(meta.deprecation ?? "", {silent: true})}</td></tr>` : "",
+        meta.disclaimer ? `  <tr><th>⚠️ Disclaimer</th><td>${marked.parse(meta.disclaimer ?? "", {silent: true})}</td></tr>` : "",
+        meta.notes ? `  <tr><th>ℹ Additional notes</th><td>${marked.parse(meta.notes ?? "", {silent: true})}</td></tr>` : "",
         meta.authors?.length ? `<tr><th>Authors</th><td>${[meta.authors].flat().map(author => `<a href="https://github.com/${author}">@${author}</a>`)}</td></tr>` : "",
         "  <tr>",
         '    <th rowspan="3">Supported features<br><sub><a href="metadata.yml">→ Full specification</a></sub></th>',
         `    <td>${Object.entries(compatibility).filter(([_, value]) => value).map(([id]) => `<a href="/source/templates/${id}/README.md"><code>${templates[id].name ?? ""}</code></a>`).join(" ")}</td>`,
         "  </tr>",
         "  <tr>",
-        `    <td>${[
-          meta.supports?.includes("user") ? "<code>👤 Users</code>" : "",
-          meta.supports?.includes("organization") ? "<code>👥 Organizations</code>" : "",
-          meta.supports?.includes("repository") ? "<code>📓 Repositories</code>" : "",
-        ].filter(v => v).join(" ")
+        `    <td>${
+          [
+            meta.supports?.includes("user") ? "<code>👤 Users</code>" : "",
+            meta.supports?.includes("organization") ? "<code>👥 Organizations</code>" : "",
+            meta.supports?.includes("repository") ? "<code>📓 Repositories</code>" : "",
+          ].filter(v => v).join(" ")
         }</td>`,
         "  </tr>",
         "  <tr>",
-        `    <td>${[
-          ...(meta.scopes ?? []).map(scope => `<code>🔑 ${{ public_access: "(scopeless)" }[scope] ?? scope}</code>`),
-          ...Object.entries(inputs).filter(([_, { type }]) => type === "token").map(([token]) => `<code>🗝️ ${token}</code>`),
-          ...(meta.scopes?.length ? ["read:org", "read:user", "read:packages", "repo"].map(scope => !meta.scopes.includes(scope) ? `<code>${scope} (optional)</code>` : null).filter(v => v) : []),
-        ].filter(v => v).join(" ") || "<i>No tokens are required for this plugin</i>"
+        `    <td>${
+          [
+            ...(meta.scopes ?? []).map(scope => `<code>🔑 ${{public_access: "(scopeless)"}[scope] ?? scope}</code>`),
+            ...Object.entries(inputs).filter(([_, {type}]) => type === "token").map(([token]) => `<code>🗝️ ${token}</code>`),
+            ...(meta.scopes?.length ? ["read:org", "read:user", "read:packages", "repo"].map(scope => !meta.scopes.includes(scope) ? `<code>${scope} (optional)</code>` : null).filter(v => v) : []),
+          ].filter(v => v).join(" ") || "<i>No tokens are required for this plugin</i>"
         }</td>`,
         "  </tr>",
         "  <tr>",
-        demos({ colspan: 2, wrap: name === "base", examples: meta.examples }),
+        demos({colspan: 2, wrap: name === "base", examples: meta.examples}),
         "  </tr>",
         "</table>",
       ].filter(v => v).join("\n")
@@ -464,7 +466,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
         "  <tr>",
         '    <td align="center" nowrap="nowrap">Option</i></td><td align="center" nowrap="nowrap">Description</td>',
         "  </tr>",
-        Object.entries(inputs).map(([option, { description, type, ...o }]) => {
+        Object.entries(inputs).map(([option, {description, type, ...o}]) => {
           const cell = []
           if (o.required)
             cell.push("✔️ Required<br>")
@@ -515,7 +517,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
             cell.push(`<b>allowed values:</b><ul>${o.values.map(value => `<li>${value}</li>`).join("")}</ul>`)
           return `  <tr>
     <td nowrap="nowrap"><h4><code>${option}</code></h4></td>
-    <td rowspan="2">${marked.parse(description, { silent: true })}<img width="900" height="1" alt=""></td>
+    <td rowspan="2">${marked.parse(description, {silent: true})}<img width="900" height="1" alt=""></td>
   </tr>
   <tr>
     <td nowrap="nowrap">${cell.join("\n")}</td>
@@ -525,7 +527,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
       ].flat(Infinity).filter(s => s).join("\n")
 
       //Readme descriptor
-      meta.readme = { demo, table, header }
+      meta.readme = {demo, table, header}
     }
 
     //Icon
@@ -541,7 +543,7 @@ metadata.plugin = async function ({ __plugins, __templates, name, logger }) {
 }
 
 /**Metadata extractor for templates */
-metadata.template = async function ({ __templates, name, plugins }) {
+metadata.template = async function({__templates, name, plugins}) {
   try {
     //Load meta descriptor
     const raw = fs.existsSync(path.join(__templates, name, "metadata.yml")) ? `${await fs.promises.readFile(path.join(__templates, name, "metadata.yml"), "utf-8")}` : ""
@@ -563,32 +565,34 @@ metadata.template = async function ({ __templates, name, plugins }) {
       "<table>",
       '  <tr><td colspan="2"><a href="/README.md#%EF%B8%8F-templates">← Back to templates index</a></td></tr>',
       `  <tr><th colspan="2"><h3>${meta.name ?? "(unnamed template)"}</h3></th></tr>`,
-      `  <tr><td colspan="2" align="center">${marked.parse(meta.description ?? "", { silent: true })}</td></tr>`,
+      `  <tr><td colspan="2" align="center">${marked.parse(meta.description ?? "", {silent: true})}</td></tr>`,
       "  <tr>",
       '    <th rowspan="3">Supported features<br><sub><a href="metadata.yml">→ Full specification</a></sub></th>',
       `    <td>${Object.entries(compatibility).filter(([_, value]) => value).map(([id]) => `<a href="/source/plugins/${id}/README.md" title="${plugins[id].name}">${plugins[id].icon}</a>`).join(" ")}${meta.formats?.includes("markdown") ? " <code>✓ embed()</code>" : ""}</td>`,
       "  </tr>",
       "  <tr>",
-      `    <td>${[
-        meta.supports?.includes("user") ? "<code>👤 Users</code>" : "",
-        meta.supports?.includes("organization") ? "<code>👥 Organizations</code>" : "",
-        meta.supports?.includes("repository") ? "<code>📓 Repositories</code>" : "",
-      ].filter(v => v).join(" ")
+      `    <td>${
+        [
+          meta.supports?.includes("user") ? "<code>👤 Users</code>" : "",
+          meta.supports?.includes("organization") ? "<code>👥 Organizations</code>" : "",
+          meta.supports?.includes("repository") ? "<code>📓 Repositories</code>" : "",
+        ].filter(v => v).join(" ")
       }</td>`,
       "  </tr>",
       "  <tr>",
-      `    <td>${[
-        meta.formats?.includes("svg") ? "<code>*️⃣ SVG</code>" : "",
-        meta.formats?.includes("png") ? "<code>*️⃣ PNG</code>" : "",
-        meta.formats?.includes("jpeg") ? "<code>*️⃣ JPEG</code>" : "",
-        meta.formats?.includes("json") ? "<code>#️⃣ JSON</code>" : "",
-        meta.formats?.includes("markdown") ? "<code>🔠 Markdown</code>" : "",
-        meta.formats?.includes("markdown-pdf") ? "<code>🔠 Markdown (PDF)</code>" : "",
-      ].filter(v => v).join(" ")
+      `    <td>${
+        [
+          meta.formats?.includes("svg") ? "<code>*️⃣ SVG</code>" : "",
+          meta.formats?.includes("png") ? "<code>*️⃣ PNG</code>" : "",
+          meta.formats?.includes("jpeg") ? "<code>*️⃣ JPEG</code>" : "",
+          meta.formats?.includes("json") ? "<code>#️⃣ JSON</code>" : "",
+          meta.formats?.includes("markdown") ? "<code>🔠 Markdown</code>" : "",
+          meta.formats?.includes("markdown-pdf") ? "<code>🔠 Markdown (PDF)</code>" : "",
+        ].filter(v => v).join(" ")
       }</td>`,
       "  </tr>",
       "  <tr>",
-      demos({ colspan: 2, examples: meta.examples }),
+      demos({colspan: 2, examples: meta.examples}),
       "  </tr>",
       "</table>",
     ].join("\n")
@@ -601,7 +605,7 @@ metadata.template = async function ({ __templates, name, plugins }) {
       formats: meta.formats ?? null,
       supports: meta.supports ?? null,
       readme: {
-        demo: demos({ examples: meta.examples }),
+        demo: demos({examples: meta.examples}),
         compatibility: {
           ...Object.fromEntries(Object.entries(compatibility).filter(([_, value]) => value)),
           ...Object.fromEntries(Object.entries(compatibility).filter(([_, value]) => !value).map(([key, value]) => [key, meta.formats?.includes("markdown") ? "embed" : value])),
@@ -609,7 +613,7 @@ metadata.template = async function ({ __templates, name, plugins }) {
         },
         header,
       },
-      check({ q, account = "bypass", format = null }) {
+      check({q, account = "bypass", format = null}) {
         //Support check
         if (account !== "bypass") {
           const context = q.repo ? "repository" : account
@@ -630,11 +634,11 @@ metadata.template = async function ({ __templates, name, plugins }) {
 
 /**Metadata converters */
 metadata.to = {
-  query(key, { name = null } = {}) {
+  query(key, {name = null} = {}) {
     key = key.replace(/^plugin_/, "").replace(/_/g, ".")
     return name ? key.replace(new RegExp(`^(${name}.)`, "g"), "") : key
   },
-  yaml(key, { name = "" } = {}) {
+  yaml(key, {name = ""} = {}) {
     const parts = []
     if (key !== "enabled")
       parts.unshift(key.replace(/\./g, "_"))
@@ -645,7 +649,7 @@ metadata.to = {
 }
 
 //Demo for main and individual readmes
-function demos({ colspan = null, wrap = false, examples = {} } = {}) {
+function demos({colspan = null, wrap = false, examples = {}} = {}) {
   if (("default1" in examples) && ("default2" in examples)) {
     return [
       wrap ? '<td colspan="2"><table><tr>' : "",
@@ -660,16 +664,17 @@ function demos({ colspan = null, wrap = false, examples = {} } = {}) {
   }
   return [
     `    <td ${colspan ? `colspan="${colspan}"` : ""} align="center">`,
-    `${Object.entries(examples).map(([text, link]) => {
-      let img = `<img src="${link}" alt=""></img>`
-      if (text !== "default") {
-        const open = text.charAt(0) === "+" ? " open" : ""
-        text = open ? text.substring(1) : text
-        text = `${text.charAt(0).toLocaleUpperCase()}${text.substring(1)}`
-        img = `<details${open}><summary>${text}</summary>${img}</details>`
-      }
-      return `      ${img}`
-    }).join("\n")
+    `${
+      Object.entries(examples).map(([text, link]) => {
+        let img = `<img src="${link}" alt=""></img>`
+        if (text !== "default") {
+          const open = text.charAt(0) === "+" ? " open" : ""
+          text = open ? text.substring(1) : text
+          text = `${text.charAt(0).toLocaleUpperCase()}${text.substring(1)}`
+          img = `<details${open}><summary>${text}</summary>${img}</details>`
+        }
+        return `      ${img}`
+      }).join("\n")
     }`,
     '      <img width="900" height="1" alt="">',
     "    </td>",

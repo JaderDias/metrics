@@ -1,4 +1,4 @@
-; (async function () {
+;(async function() {
   //App
   return new Vue({
     //Initialization
@@ -10,7 +10,7 @@
         if (localStorage.getItem("session.metrics"))
           axios.defaults.headers.common["x-metrics-session"] = localStorage.getItem("session.metrics")
       }
-      catch (error) { }
+      catch (error) {}
       //Embed
       this.embed = !!(new URLSearchParams(location.search).get("embed"))
       //From local storage
@@ -33,7 +33,7 @@
       await Promise.all([
         //GitHub limit tracker
         (async () => {
-          const { data: requests } = await axios.get("/.requests")
+          const {data: requests} = await axios.get("/.requests")
           this.requests = requests
           if (!requests.login) {
             localStorage.removeItem("session.metrics")
@@ -42,17 +42,17 @@
         })(),
         //Version
         (async () => {
-          const { data: version } = await axios.get("/.version")
+          const {data: version} = await axios.get("/.version")
           this.version = `v${version}`
         })(),
         //Hosted
         (async () => {
-          const { data: hosted } = await axios.get("/.hosted")
+          const {data: hosted} = await axios.get("/.hosted")
           this.hosted = hosted
         })(),
         //OAuth
         (async () => {
-          const { data: enabled } = await axios.get("/.oauth/enabled")
+          const {data: enabled} = await axios.get("/.oauth/enabled")
           this.oauth = enabled
         })(),
       ])
@@ -115,7 +115,7 @@
             this.loaded = ["base", ...Object.keys(this.metrics?.rendered?.plugins ?? {})]
             return
           }
-          const { processing, ...data } = (await axios.get(`/insights/query/${this.user}`)).data
+          const {processing, ...data} = (await axios.get(`/insights/query/${this.user}`)).data
           if (processing) {
             let completed = 0
             this.progress = 1 / (data.plugins.length + 1)
@@ -125,13 +125,13 @@
                 return
               do {
                 try {
-                  const { data } = await axios.get(`/insights/query/${this.user}/${plugin}`)
+                  const {data} = await axios.get(`/insights/query/${this.user}/${plugin}`)
                   if (!data)
                     throw new Error(`${plugin}: no data`)
                   if (plugin === "base")
-                    this.metrics = { rendered: data, mime: "application/json", errors: [] }
+                    this.metrics = {rendered: data, mime: "application/json", errors: []}
                   else
-                    Object.assign(this.metrics.rendered.plugins, { [plugin]: data })
+                    Object.assign(this.metrics.rendered.plugins, {[plugin]: data})
                   break
                 }
                 catch {
@@ -152,22 +152,22 @@
           }
         }
         catch (error) {
-          this.error = { code: error.response.status, message: error.response.data }
+          this.error = {code: error.response.status, message: error.response.data}
         }
         finally {
           this.pending = false
           try {
-            const { data: requests } = await axios.get("/.requests")
+            const {data: requests} = await axios.get("/.requests")
             this.requests = requests
           }
-          catch { }
+          catch {}
         }
       },
     },
     //Computed properties
     computed: {
       params() {
-        return new URLSearchParams({ from: location.href })
+        return new URLSearchParams({from: location.href})
       },
       stats() {
         return this.metrics?.rendered.user ?? null
@@ -176,10 +176,10 @@
         return this.metrics?.rendered.plugins?.sponsors ?? null
       },
       ranked() {
-        return this.metrics?.rendered.plugins?.achievements?.list?.filter(({ leaderboard }) => leaderboard).sort((a, b) => a.leaderboard.type.localeCompare(b.leaderboard.type)) ?? []
+        return this.metrics?.rendered.plugins?.achievements?.list?.filter(({leaderboard}) => leaderboard).sort((a, b) => a.leaderboard.type.localeCompare(b.leaderboard.type)) ?? []
       },
       achievements() {
-        return this.metrics?.rendered.plugins?.achievements?.list?.filter(({ leaderboard }) => !leaderboard).filter(({ title }) => !/(?:automator|octonaut|infographile)/i.test(title)) ?? []
+        return this.metrics?.rendered.plugins?.achievements?.list?.filter(({leaderboard}) => !leaderboard).filter(({title}) => !/(?:automator|octonaut|infographile)/i.test(title)) ?? []
       },
       introduction() {
         return this.metrics?.rendered.plugins?.introduction?.text ?? ""
@@ -212,7 +212,7 @@
           .replace(/#216e39/gi, "var(--color-calendar-graph-day-L4-bg)")
       },
       languages() {
-        return Object.assign(this.metrics?.rendered.plugins?.languages?.favorites ?? [], { total: this.metrics?.rendered.plugins?.languages.total })
+        return Object.assign(this.metrics?.rendered.plugins?.languages?.favorites ?? [], {total: this.metrics?.rendered.plugins?.languages.total})
       },
       reactions() {
         return this.metrics?.rendered.plugins?.reactions ?? null
@@ -221,7 +221,7 @@
         return this.metrics?.rendered.plugins?.repositories?.list ?? []
       },
       stars() {
-        return { repositories: this.metrics?.rendered.plugins?.stars?.repositories.map(({ node, starredAt }) => ({ ...node, starredAt })) ?? [] }
+        return {repositories: this.metrics?.rendered.plugins?.stars?.repositories.map(({node, starredAt}) => ({...node, starredAt})) ?? []}
       },
       topics() {
         return this.metrics?.rendered.plugins?.topics?.list ?? []
@@ -235,8 +235,8 @@
       account() {
         if (!this.metrics)
           return null
-        const { login, name } = this.metrics?.rendered.user
-        return { login, name, avatar: this.metrics?.rendered.computed.avatar, type: this.metrics?.rendered.account }
+        const {login, name} = this.metrics?.rendered.user
+        return {login, name, avatar: this.metrics?.rendered.computed.avatar, type: this.metrics?.rendered.account}
       },
       url() {
         return `${window.location.protocol}//${window.location.host}/insights/${this.user}`
@@ -260,7 +260,7 @@
       embed: false,
       localstorage: false,
       searchable: false,
-      requests: { rest: { limit: 0, used: 0, remaining: 0, reset: NaN }, graphql: { limit: 0, used: 0, remaining: 0, reset: NaN }, search: { limit: 0, used: 0, remaining: 0, reset: NaN } },
+      requests: {rest: {limit: 0, used: 0, remaining: 0, reset: NaN}, graphql: {limit: 0, used: 0, remaining: 0, reset: NaN}, search: {limit: 0, used: 0, remaining: 0, reset: NaN}},
       palette: "light",
       metrics: null,
       pending: false,

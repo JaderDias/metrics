@@ -1,6 +1,6 @@
-; (async function () {
+;(async function() {
   //Init
-  const { data: metadata } = await axios.get("/.plugins.metadata")
+  const {data: metadata} = await axios.get("/.plugins.metadata")
   delete metadata.core.web.output
   delete metadata.core.web.twemojis
   //App
@@ -15,12 +15,12 @@
         if (localStorage.getItem("session.metrics"))
           axios.defaults.headers.common["x-metrics-session"] = localStorage.getItem("session.metrics")
       }
-      catch (error) { }
+      catch (error) {}
       //Init
       await Promise.all([
         //GitHub limit tracker
         (async () => {
-          const { data: requests } = await axios.get("/.requests")
+          const {data: requests} = await axios.get("/.requests")
           this.requests = requests
           if (!requests.login) {
             localStorage.removeItem("session.metrics")
@@ -29,47 +29,47 @@
         })(),
         //Templates
         (async () => {
-          const { data: templates } = await axios.get("/.templates")
+          const {data: templates} = await axios.get("/.templates")
           templates.sort((a, b) => (a.name.startsWith("@") ^ b.name.startsWith("@")) ? (a.name.startsWith("@") ? 1 : -1) : a.name.localeCompare(b.name))
           this.templates.list = templates
           this.templates.selected = templates[0]?.name || "classic"
         })(),
         //Plugins
         (async () => {
-          const { data: plugins } = await axios.get("/.plugins")
-          this.plugins.list = plugins.filter(({ name }) => metadata[name]?.supports.includes("user") || metadata[name]?.supports.includes("organization"))
-          const categories = [...new Set(this.plugins.list.map(({ category }) => category))]
+          const {data: plugins} = await axios.get("/.plugins")
+          this.plugins.list = plugins.filter(({name}) => metadata[name]?.supports.includes("user") || metadata[name]?.supports.includes("organization"))
+          const categories = [...new Set(this.plugins.list.map(({category}) => category))]
           this.plugins.categories = Object.fromEntries(categories.map(category => [category, this.plugins.list.filter(value => category === value.category)]))
         })(),
         //Base
         (async () => {
-          const { data: base } = await axios.get("/.plugins.base")
+          const {data: base} = await axios.get("/.plugins.base")
           this.plugins.base = base
           this.plugins.enabled.base = Object.fromEntries(base.map(key => [key, true]))
         })(),
         //Extras
         (async () => {
-          const { data: extras } = await axios.get("/.extras")
+          const {data: extras} = await axios.get("/.extras")
           this.extras = extras
         })(),
         //Version
         (async () => {
-          const { data: version } = await axios.get("/.version")
+          const {data: version} = await axios.get("/.version")
           this.version = `v${version}`
         })(),
         //Hosted
         (async () => {
-          const { data: hosted } = await axios.get("/.hosted")
+          const {data: hosted} = await axios.get("/.hosted")
           this.hosted = hosted
         })(),
         //OAuth
         (async () => {
-          const { data: enabled } = await axios.get("/.oauth/enabled")
+          const {data: enabled} = await axios.get("/.oauth/enabled")
           this.oauth = enabled
         })(),
       ])
       //Generate placeholder
-      this.mock({ timeout: 200 })
+      this.mock({timeout: 200})
       setInterval(() => {
         const marker = document.querySelector("#metrics-end")
         if (marker) {
@@ -78,7 +78,7 @@
         }
       }, 100)
     },
-    components: { Prism: PrismComponent },
+    components: {Prism: PrismComponent},
     //Watchers
     watch: {
       tab: {
@@ -107,10 +107,10 @@
       tab: "overview",
       palette: "light",
       clipboard: null,
-      requests: { rest: { limit: 0, used: 0, remaining: 0, reset: NaN }, graphql: { limit: 0, used: 0, remaining: 0, reset: NaN }, search: { limit: 0, used: 0, remaining: 0, reset: NaN } },
+      requests: {rest: {limit: 0, used: 0, remaining: 0, reset: NaN}, graphql: {limit: 0, used: 0, remaining: 0, reset: NaN}, search: {limit: 0, used: 0, remaining: 0, reset: NaN}},
       cached: new Map(),
-      config: Object.fromEntries(Object.entries(metadata.core.web).map(([key, { defaulted }]) => [key, defaulted])),
-      metadata: Object.fromEntries(Object.entries(metadata).map(([key, { web }]) => [key, web])),
+      config: Object.fromEntries(Object.entries(metadata.core.web).map(([key, {defaulted}]) => [key, defaulted])),
+      metadata: Object.fromEntries(Object.entries(metadata).map(([key, {web}]) => [key, web])),
       hosted: null,
       extras: false,
       oauth: false,
@@ -140,15 +140,15 @@
           "base.community": "Community stats",
           "base.repositories": "Repositories metrics",
           "base.metadata": "Metadata",
-          ...Object.fromEntries(Object.entries(metadata).map(([key, { name }]) => [key, name])),
+          ...Object.fromEntries(Object.entries(metadata).map(([key, {name}]) => [key, name])),
         },
         options: {
-          descriptions: { ...(Object.assign({}, ...Object.entries(metadata).flatMap(([key, { web }]) => web))) },
+          descriptions: {...(Object.assign({}, ...Object.entries(metadata).flatMap(([key, {web}]) => web)))},
           ...(Object.fromEntries(
             Object.entries(
-              Object.assign({}, ...Object.entries(metadata).flatMap(([key, { web }]) => web)),
+              Object.assign({}, ...Object.entries(metadata).flatMap(([key, {web}]) => web)),
             )
-              .map(([key, { defaulted }]) => [key, defaulted]),
+              .map(([key, {defaulted}]) => [key, defaulted]),
           )),
         },
       },
@@ -176,17 +176,17 @@
     computed: {
       //URL parameters
       params() {
-        return new URLSearchParams({ from: location.href })
+        return new URLSearchParams({from: location.href})
       },
       //Unusable plugins
       unusable() {
-        const plugins = Object.entries(this.plugins.enabled).filter(([key, value]) => (value == true) && (!this.plugins.list.filter(({ name }) => name === key)[0]?.enabled)).map(([key]) => key)
+        const plugins = Object.entries(this.plugins.enabled).filter(([key, value]) => (value == true) && (!this.plugins.list.filter(({name}) => name === key)[0]?.enabled)).map(([key]) => key)
         const options = this.edited.filter(option => !this.supports(this.plugins.options.descriptions[option]))
         return [...plugins, ...options].sort()
       },
       //Edited plugins options
       edited() {
-        return Object.keys(this.plugins.enabled).flatMap(plugin => Object.keys(this.options({ name: plugin })).filter(key => this.plugins.options[key] !== metadata[plugin]?.web[key]?.defaulted))
+        return Object.keys(this.plugins.enabled).flatMap(plugin => Object.keys(this.options({name: plugin})).filter(key => this.plugins.options[key] !== metadata[plugin]?.web[key]?.defaulted))
       },
       //User's avatar
       avatar() {
@@ -269,10 +269,10 @@
           `          template: ${this.templates.selected}`,
           `          base: ${Object.entries(this.plugins.enabled.base).filter(([key, value]) => value).map(([key]) => key).join(", ") || '""'}`,
           ...[
-            ...Object.entries(this.plugins.options).filter(([key, value]) => (key in metadata.base.web) && (value !== metadata.base.web[key]?.defaulted)).map(([key, value]) => `          ${key.replace(/[.]/g, "_")}: ${typeof value === "boolean" ? { true: "yes", false: "no" }[value] : value}`),
+            ...Object.entries(this.plugins.options).filter(([key, value]) => (key in metadata.base.web) && (value !== metadata.base.web[key]?.defaulted)).map(([key, value]) => `          ${key.replace(/[.]/g, "_")}: ${typeof value === "boolean" ? {true: "yes", false: "no"}[value] : value}`),
             ...Object.entries(this.plugins.enabled).filter(([key, value]) => (key !== "base") && (value)).map(([key]) => `          plugin_${key}: yes`),
-            ...Object.entries(this.plugins.options).filter(([key, value]) => (value) && (!(key in metadata.base.web))).filter(([key, value]) => this.plugins.enabled[key.split(".")[0]]).map(([key, value]) => `          plugin_${key.replace(/[.]/g, "_")}: ${typeof value === "boolean" ? { true: "yes", false: "no" }[value] : value}`),
-            ...Object.entries(this.config).filter(([key, value]) => (value) && (value !== metadata.core.web[key]?.defaulted)).map(([key, value]) => `          config_${key.replace(/[.]/g, "_")}: ${typeof value === "boolean" ? { true: "yes", false: "no" }[value] : value}`),
+            ...Object.entries(this.plugins.options).filter(([key, value]) => (value) && (!(key in metadata.base.web))).filter(([key, value]) => this.plugins.enabled[key.split(".")[0]]).map(([key, value]) => `          plugin_${key.replace(/[.]/g, "_")}: ${typeof value === "boolean" ? {true: "yes", false: "no"}[value] : value}`),
+            ...Object.entries(this.config).filter(([key, value]) => (value) && (value !== metadata.core.web[key]?.defaulted)).map(([key, value]) => `          config_${key.replace(/[.]/g, "_")}: ${typeof value === "boolean" ? {true: "yes", false: "no"}[value] : value}`),
           ].sort(),
         ].join("\n")
       },
@@ -294,7 +294,7 @@
     methods: {
       //Refresh computed properties
       async refresh() {
-        const keys = { action: ["scopes", "action"], markdown: ["url", "embed"] }[this.tab]
+        const keys = {action: ["scopes", "action"], markdown: ["url", "embed"]}[this.tab]
         if (keys) {
           for (const key of keys)
             this._computedWatchers[key]?.run()
@@ -302,7 +302,7 @@
         }
       },
       //Load and render placeholder image
-      async mock({ timeout = 600 } = {}) {
+      async mock({timeout = 600} = {}) {
         this.refresh()
         clearTimeout(this.templates.placeholder.timeout)
         this.templates.placeholder.timeout = setTimeout(async () => {
@@ -333,26 +333,26 @@
           this.generated.error = null
         }
         catch (error) {
-          this.generated.error = { code: error.response.status, message: error.response.data }
+          this.generated.error = {code: error.response.status, message: error.response.data}
         }
         finally {
           this.generated.pending = false
           try {
-            const { data: requests } = await axios.get("/.requests")
+            const {data: requests} = await axios.get("/.requests")
             this.requests = requests
           }
-          catch { }
+          catch {}
         }
       },
       //Get available options from plugin
-      options({ name }) {
+      options({name}) {
         return Object.fromEntries(Object.entries(this.plugins.options.descriptions).filter(([key]) => ((key.startsWith(`${name}.`)) || (key === name)) && (!(key in metadata.base.web))))
       },
       //Check if option is supported
       supports(option) {
         if (!option)
           return false
-        const { extras: required = null } = option
+        const {extras: required = null} = option
         if (!Array.isArray(required))
           return true
         if (!Array.isArray(this.extras))
